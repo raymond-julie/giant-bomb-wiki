@@ -1,0 +1,28 @@
+{
+  "name": "GBCloudflarePurge",
+  "version": "1.0.0",
+  "author": ["Chuck Zimmerheld"],
+  "description": "Purges the Cloudflare edge cache when pages change. No-op unless zone id + api token are configured.",
+  "manifest_version": 2,
+  "AutoloadClasses": {
+    "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks": "src/Hooks.php"
+  },
+  "config": {
+    "GBCloudflareZoneId": {
+      "value": ""
+    },
+    "GBCloudflareApiToken": {
+      "value": ""
+    }
+  },
+  "Hooks": {
+    "PageSaveComplete": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onPageSaveComplete",
+    "PageDeleteComplete": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onPageDeleteComplete",
+    "PageMoveComplete": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onPageMoveComplete",
+    "PageUndeleteComplete": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onPageUndeleteComplete",
+    "ArticlePurge": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onArticlePurge",
+    "HTMLFileCache::useFileCache": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onHTMLFileCacheUseFileCache",
+    "SpecialPageBeforeExecute": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onSpecialPageBeforeExecute",
+    "FileUpload": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onFileUpload"
+  }
+}

@@ -51,6 +51,9 @@ RUN cd /var/www/html \
  && git clone -b 'REL1_43' --single-branch --depth 1 https://gerrit.wikimedia.org/r/mediawiki/extensions/ExternalData \
  && wget https://github.com/octfx/mediawiki-extensions-TemplateStylesExtender/archive/refs/tags/v2.0.0.zip \
  && unzip v2.0.0.zip && rm v2.0.0.zip && mv mediawiki-extensions-TemplateStylesExtender-2.0.0 TemplateStylesExtender \
+ # GTag has no release tags -> pin to a known-good master commit (requires MW 1.43+)
+ && git clone https://github.com/SkizNet/mediawiki-GTag.git GTag \
+ && git -C GTag checkout 59c5504da491b3e2d7f7d38c520353332611405d \
  && cd /var/www/html/ \
  && composer update --no-dev
 
@@ -95,6 +98,7 @@ COPY --chown=www-data:www-data ./extensions/GBGallery /var/www/html/extensions/G
 COPY --chown=www-data.www-data ./extensions/GBModeration /var/www/html/extensions/GBModeration
 COPY --chown=www-data:www-data ./extensions/GBEnvLuaBridge /var/www/html/extensions/GBEnvLuaBridge
 COPY --chown=www-data.www-data ./extensions/GBVirtualReviewPages /var/www/html/extensions/GBVirtualReviewPages
+COPY --chown=www-data:www-data ./extensions/GBCloudflarePurge /var/www/html/extensions/GBCloudflarePurge
 RUN cd /var/www/html/extensions/GbSessionProvider && composer update --no-dev
 
 # Installation script for a new wiki (which copies the LocalSettings.php)
