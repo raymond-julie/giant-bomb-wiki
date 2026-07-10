@@ -14,10 +14,11 @@ class HtmlToMediaWikiConverter
 
     /**
      * Optional hook: resolve legacy data-ref-id guids to a full wiki page title (e.g. "Games/Foo")
-     * before querying the local API database. Return null to fall through to built-in logic.
+     * before querying the local API database. Return null to fall through to built-in logic,
+     * or false to drop the link entirely and keep just its display text.
      * Fourth argument is the &lt;a&gt; element (for slug fallback without DB).
      *
-     * @var null|callable(string $contentGuid, int $contentTypeId, int $contentId, \DOMElement $link): ?string
+     * @var null|callable(string $contentGuid, int $contentTypeId, int $contentId, \DOMElement $link): null|false|string
      */
     private $wikiPageTitleResolver = null;
 
@@ -250,40 +251,27 @@ class HtmlToMediaWikiConverter
      */
     public function preProcess(string $description): string
     {
-        // replace empty h# tags
+        // replace empty h# tags. [^>]* + \1 keep the match inside one same-level
+        // tag -- lazy .*? crawled the single-line html and ate half the article
         $description = preg_replace(
-            "/<h\d{1}.*?>\s*<\/h\d{1}>/",
+            "/<h(\d)[^>]*>\s*<\/h\\1>/",
             "",
             $description,
         );
 
-        // replace the h2s with == (s: inner heading may span lines)
-        $description = preg_replace(
-            "/<h2.*?>(.*?)<\/h2>/s",
-            "\n==$1==\n",
-            $description,
-        );
-
-        // replace the h3s with ===
-        $description = preg_replace(
-            "/<h3.*?>(.*?)<\/h3>/s",
-            "\n===$1===\n",
-            $description,
-        );
-
-        // replace the h4s with ====
-        $description = preg_replace(
-            "/<h4.*?>(.*?)<\/h4>/s",
-            "\n====$1====\n",
-            $description,
-        );
-
-        // replace the h5s with =====
-        $description = preg_replace(
-            "/<h5.*?>(.*?)<\/h5>/s",
-            "\n=====$1=====\n",
-            $description,
-        );
+        // replace h2-h5 with ==..== markup. strip <br> and collapse whitespace
+        // inside the heading -- a <br> in there becomes a newline later and
+        // splits the heading across lines, which mw renders as literal ='s
+        foreach ([2 => "==", 3 => "===", 4 => "====", 5 => "====="] as $level => $marks) {
+            $description = preg_replace_callback(
+                "/<h{$level}.*?>(.*?)<\/h{$level}>/s",
+                function ($m) use ($marks) {
+                    $inner = trim(preg_replace("/<br[^>]*>|\s+/", " ", $m[1]));
+                    return "\n{$marks}{$inner}{$marks}\n";
+                },
+                $description,
+            );
+        }
 
         // replace the i|em with ''
         $description = preg_replace("/<\/?(?:i|em)>/", "''", $description);
@@ -361,29 +349,29 @@ class HtmlToMediaWikiConverter
             $mwTable .= "|+ " . trim($this->getInnerHtml($caption)) . "\n";
         }
 
-        $processRows = function (DOMElement $parent): string {
+        $processOneRow = function (DOMElement $tr): string {
+            $out = "|-\n";
+            $cells = [];
+            $cellType = "| ";
+            foreach ($tr->childNodes as $cell) {
+                if (
+                    $cell->nodeType === XML_ELEMENT_NODE &&
+                    in_array($cell->tagName, ["th", "td"])
+                ) {
+                    $cellType = $cell->tagName === "th" ? "! " : "| ";
+                    $cells[] = trim($this->getInnerHtml($cell));
+                }
+            }
+            if (!empty($cells)) {
+                $separator = strpos($cells[0], "!") === 0 ? "!!" : "||";
+                $out .= $cellType . implode($separator, $cells) . "\n";
+            }
+            return $out;
+        };
+        $processRows = function (DOMElement $parent) use ($processOneRow): string {
             $sectionContent = "";
             foreach ($parent->getElementsByTagName("tr") as $tr) {
-                $sectionContent .= "|-\n";
-                $cells = [];
-                $cellType = "| ";
-
-                foreach ($tr->childNodes as $cell) {
-                    if (
-                        $cell->nodeType === XML_ELEMENT_NODE &&
-                        in_array($cell->tagName, ["th", "td"])
-                    ) {
-                        $cellType = $cell->tagName === "th" ? "! " : "| ";
-                        $cellInnerHtml = trim($this->getInnerHtml($cell));
-                        $cells[] = $cellInnerHtml;
-                    }
-                }
-
-                if (!empty($cells)) {
-                    $separator = strpos($cells[0], "!") === 0 ? "!!" : "||";
-                    $sectionContent .=
-                        $cellType . implode($separator, $cells) . "\n";
-                }
+                $sectionContent .= $processOneRow($tr);
             }
             return $sectionContent;
         };
@@ -399,13 +387,14 @@ class HtmlToMediaWikiConverter
                 $mwTable .= $processRows($tbody);
             }
         } else {
+            // no tbody: emit each row ONCE. (bug was processRows($tr->parentNode)
+            // per row, which re-emitted every sibling row N times)
             foreach ($table->getElementsByTagName("tr") as $tr) {
                 if (
                     $tr->parentNode->nodeName !== "thead" &&
                     $tr->parentNode->nodeName !== "tfoot"
                 ) {
-                    $mwTable .= "|-\n";
-                    $mwTable .= $processRows($tr->parentNode);
+                    $mwTable .= $processOneRow($tr);
                 }
             }
         }
@@ -438,6 +427,12 @@ class HtmlToMediaWikiConverter
         $displayText = trim($this->getInnerHtml($link));
         if (preg_match('/<img src="(.+)"\/?>/', $displayText, $matches)) {
             $displayText = $matches[1];
+        }
+
+        // legacy has anchors with blank text (<a ...> </a>) that render as
+        // nothing -- emitting [[x|]] makes the pipe trick print the raw title
+        if ($displayText === "") {
+            return "";
         }
 
         // check for external link
@@ -492,6 +487,10 @@ class HtmlToMediaWikiConverter
                         $contentId,
                         $link,
                     );
+                    if ($resolved === false) {
+                        // no wiki page for this guid -> plain text
+                        return $displayText;
+                    }
                     if (is_string($resolved) && $resolved !== "") {
                         return "[[" . $resolved . "|" . $displayText . "]]";
                     }
@@ -652,6 +651,24 @@ class HtmlToMediaWikiConverter
                     ) {
                         $mwList .= $this->convertList($listChild, $depth + 1);
                     }
+                }
+            } elseif (
+                $child->nodeType === XML_ELEMENT_NODE &&
+                in_array($child->tagName, ["ul", "ol"])
+            ) {
+                // malformed legacy html nests lists directly inside lists
+                $mwList .= $this->convertList($child, $depth);
+            } elseif ($child->nodeType === XML_ELEMENT_NODE) {
+                // stray non-li content (legacy wraps <p> in <ul>) -- dropping it ate whole blocks
+                $stray = trim($this->getInnerHtml($child));
+                if ($stray !== "") {
+                    $mwList .= $stray . "\n";
+                }
+            } elseif ($child->nodeType === XML_TEXT_NODE) {
+                // text nodes include inner lists already converted this pass
+                $stray = trim($child->textContent);
+                if ($stray !== "") {
+                    $mwList .= $stray . "\n";
                 }
             }
         }

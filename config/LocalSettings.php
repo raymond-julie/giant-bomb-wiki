@@ -198,6 +198,13 @@ if ($wikiEnv === "prod") {
     $wgFileCacheDirectory = "$IP/cache/html";
     $wgShowIPinHeader = false;
     $wgFileCacheDepth = 2;
+
+    # emit `Cache-Control: s-maxage=...` on anon page views so Cloudflare can
+    # edge-cache them. purge-on-edit is handled by GBCloudflarePurge (below),
+    # NOT $wgCdnServers, so leave that unset. see the two required Cloudflare
+    # cache rules in extensions/GBCloudflarePurge/README.md.
+    $wgUseCdn = true;
+    $wgCdnMaxAge = (int) (getenv("CDN_MAX_AGE") ?: 3600);
 }
 
 $wgResourceLoaderMaxage = [
@@ -882,3 +889,14 @@ if ($wikiEnv === "dev") {
         "GbSessionProvider" => "/var/log/mediawiki/gb_session_provider.log",
     ];
 }
+
+# =============================================================================
+# CLOUDFLARE EDGE CACHE PURGING
+# =============================================================================
+# No-op unless zone id + api token are set, so it's safe to load in dev.
+# Pairs with $wgUseCdn (prod block above) + the two Cloudflare cache rules
+# documented in extensions/GBCloudflarePurge/README.md.
+
+wfLoadExtension("GBCloudflarePurge");
+$wgGBCloudflareZoneId = getenv("CLOUDFLARE_ZONE_ID") ?: "";
+$wgGBCloudflareApiToken = getenv("CLOUDFLARE_API_TOKEN") ?: "";

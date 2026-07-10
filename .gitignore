@@ -42,4 +42,18 @@ gb_api_scripts/import_xml/*.xml
 /gb_api_scripts/libs/ProdGuidResolver.php
 /gb_api_scripts/libs/docker_local_db.php
 /import_templates/fixEscapedSlashPageTitles.php
+
+# guid-audit truncation-repair one-shots (2026-07). Generate/apply/verify the
+# legacy-migration body restore; not part of the running app.
+/gb_api_scripts/repair_truncated_descriptions.php
+/gb_api_scripts/apply_body_repairs_remote.php
+/gb_api_scripts/recover_dup_leads.php
+/gb_api_scripts/remote_rebody.php
+/gb_api_scripts/scope_table_dups.php
+/gb_api_scripts/scan_real_dups.php
+/gb_api_scripts/split_by_dumpdate.php
+/import_templates/apply_body_repairs.php
+/import_templates/rebody_repaired_pages.php
+/import_templates/revert_duplicate_repairs.php
 .env.me
+

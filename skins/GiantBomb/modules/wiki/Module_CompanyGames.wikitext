@@ -1,0 +1,66 @@
+-- shared developed/published games queries for company pages.
+-- CompanyEnd (limit 100) and CompanySidebar (limit 20) used to run the same
+-- two store-wide reverse queries twice each; module state persists across
+-- #invoke calls within a parse, so each relation is queried exactly once.
+local p = {}
+
+local PROPS = {
+    developed = 'Has developers',
+    published = 'Has publishers',
+}
+local MAX = 100
+
+local cache = {}
+
+-- smw hands values back as wikitext links even with link=none -> unwrap
+local function plain(v)
+    local inner = tostring(v):match('^%[%[(.-)%]%]$')
+    if inner then
+        return inner:match('^(.-)|') or inner
+    end
+    return tostring(v)
+end
+
+local function fetch(relation)
+    if cache[relation] == nil then
+        local page = mw.title.getCurrentTitle().prefixedText
+        cache[relation] = mw.smw.ask{
+            '[[' .. PROPS[relation] .. '::' .. page .. ']]',
+            '[[Category:Games]]',
+            '?Display title of=display',
+            'mainlabel=page',
+            'link=none',
+            'limit=' .. MAX,
+        } or false
+    end
+    return cache[relation]
+end
+
+-- {{#invoke:CompanyGames|list|developed|limit=20|default=None}}
+function p.list(frame)
+    local args = frame.args
+    local rows = fetch(args[1])
+    if not rows or #rows == 0 then
+        return '<li><em>' .. (args.default or 'None') .. '</em></li>'
+    end
+
+    local limit = math.min(tonumber(args.limit) or MAX, #rows)
+    local items = {}
+    for i = 1, limit do
+        local row = rows[i]
+        local page = plain(row.page)
+        local display = row.display
+        if type(display) == 'table' then
+            display = display[1]
+        end
+        if display ~= nil and display ~= '' then
+            display = plain(display)
+        else
+            display = string.match(page, '([^/]+)$') or page
+        end
+        items[#items + 1] = '<li>[[' .. page .. '|' .. display .. ']]</li>'
+    end
+    return table.concat(items)
+end
+
+return p
