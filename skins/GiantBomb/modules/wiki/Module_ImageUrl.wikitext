@@ -1,0 +1,14 @@
+local p = {}
+
+-- percent-encode bytes that break wikitext URL parsing: any whitespace
+-- (incl. unicode spaces like U+202F from mac screenshot filenames), quotes,
+-- brackets, and all non-ascii bytes. normal URL chars and existing %XX
+-- escapes pass through, so already-valid URLs come out unchanged.
+function p.encode(frame)
+    local url = frame.args[1] or ""
+    return (url:gsub('[%z\1-\32"<>%[%]{}|\\^`\127-\255]', function(c)
+        return string.format("%%%02X", string.byte(c))
+    end))
+end
+
+return p

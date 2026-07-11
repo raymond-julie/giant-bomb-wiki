@@ -75,7 +75,9 @@ class ImportWikiTemplates extends Maintenance
         ];
 
         // Company page templates
+        // module first: templates #invoke it, so it must exist before they land
         $companyTemplates = [
+            "Module:CompanyGames" => "$moduleDir/Module_CompanyGames.wikitext",
             "Template:Company" => "$templateDir/Template_Company.wikitext",
             "Template:CompanyEnd" => "$templateDir/Template_CompanyEnd.wikitext",
             "Template:CompanySidebar" => "$templateDir/Template_CompanySidebar.wikitext",
@@ -212,6 +214,7 @@ class ImportWikiTemplates extends Maintenance
             "Template:LandingPageQuery" => "$templateDir/Template_LandingPageQuery.wikitext",
 
             "Module:DateHelper" => "$moduleDir/Module_DateHelper.wikitext",
+            "Module:ImageUrl" => "$moduleDir/Module_ImageUrl.wikitext",
             "Template:DateDisplay" => "$templateDir/Template_DateDisplay.wikitext",
 
             //images page

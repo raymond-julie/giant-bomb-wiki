@@ -182,6 +182,8 @@ $wgObjectCaches['redis'] = [
 ];
 
 $wgMainCacheType = 'redis';
+# MainStash defaults to db-replicated -> objectcache REPLACE pileup on cloud sql
+$wgMainStash = 'redis';
 $wgMemCachedServers = [];
 $wgParserCacheType = 'redis';
 $wgParserCacheExpireTime = 86400 * 7;
@@ -196,6 +198,14 @@ if ($wikiEnv === "prod") {
     $wgFileCacheDirectory = "$IP/cache/html";
     $wgShowIPinHeader = false;
     $wgFileCacheDepth = 2;
+
+    # s-maxage on anon views so cloudflare edge-caches them (rules in
+    # extensions/GBCloudflarePurge/README.md). gated on the purge creds:
+    # caching without purge-on-edit would silently serve stale edits
+    if (getenv("CLOUDFLARE_ZONE_ID") && getenv("CLOUDFLARE_API_TOKEN")) {
+        $wgUseCdn = true;
+        $wgCdnMaxAge = (int) (getenv("CDN_MAX_AGE") ?: 3600);
+    }
 }
 
 $wgResourceLoaderMaxage = [
@@ -225,9 +235,9 @@ if ($wikiEnv === "dev") {
 $wgUseETag = true;
 $wgInvalidateCacheOnLocalSettingsChange = true;
 
-# Jobs disabled on page views - run via cron/systemd instead
-# this can be set to 0.5 to run every other page, .25 every 4, etc. not set at all = 1 so on every page save
-$wgJobRunRate = 0.25;
+# prod drains jobs via docker/jobs-cron, not web workers (in-request job work
+# was OOMing the vm); dev has no cron so keep some on-request
+$wgJobRunRate = $wikiEnv === "prod" ? 0 : 0.25;
 
 # =============================================================================
 # UPLOADS & IMAGES
@@ -879,4 +889,31 @@ if ($wikiEnv === "dev") {
         // log channel -> log path
         "GbSessionProvider" => "/var/log/mediawiki/gb_session_provider.log",
     ];
+}
+
+# =============================================================================
+# CLOUDFLARE EDGE CACHE PURGING
+# =============================================================================
+# No-op unless zone id + api token are set, so it's safe to load in dev.
+# Pairs with $wgUseCdn (prod block above) + the two Cloudflare cache rules
+# documented in extensions/GBCloudflarePurge/README.md.
+
+wfLoadExtension("GBCloudflarePurge");
+$wgGBCloudflareZoneId = getenv("CLOUDFLARE_ZONE_ID") ?: "";
+$wgGBCloudflareApiToken = getenv("CLOUDFLARE_API_TOKEN") ?: "";
+
+# core relays every purged url through this channel -> send to cloudflare
+$wgEventRelayerConfig["cdn-url-purges"] = [
+    "class" =>
+        \MediaWiki\Extension\GBCloudflarePurge\CloudflareEventRelayer::class,
+];
+
+# =============================================================================
+# GOOGLE ANALYTICS (GA4 via Extension:GTag -- gtag.js only, no tag manager)
+# =============================================================================
+
+$gaMeasurementId = getenv("GA_MEASUREMENT_ID");
+if ($gaMeasurementId) {
+    wfLoadExtension("GTag");
+    $wgGTagAnalyticsId = $gaMeasurementId;
 }

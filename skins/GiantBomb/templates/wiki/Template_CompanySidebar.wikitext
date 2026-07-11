@@ -81,16 +81,7 @@ This template is called automatically by <code><nowiki>{{CompanyEnd}}</nowiki></
 <div class="gb-accordion gb-accordion--open">
 <div class="gb-accordion-header">Developed Games</div>
 <ul class="gb-accordion-content">
-{{#ask: [[Has developers::{{FULLPAGENAME}}]] [[Category:Games]]
-  |format=list
-  |link=all
-  |limit=20
-  |default=<li><em>None</em></li>
-  |intro=<li>
-  |outro=</li>
-  |sep=</li><li>
-  |searchlabel=
-}}
+{{#invoke:CompanyGames|list|developed|limit=20|default=None}}
 <li class="gb-sidebar-more">[{{canonicalurl:{{FULLPAGENAME}}}}#DevelopedGames view all →]</li>
 </ul>
 </div>
@@ -98,16 +89,7 @@ This template is called automatically by <code><nowiki>{{CompanyEnd}}</nowiki></
 <div class="gb-accordion">
 <div class="gb-accordion-header">Published Games</div>
 <ul class="gb-accordion-content">
-{{#ask: [[Has publishers::{{FULLPAGENAME}}]] [[Category:Games]]
-  |format=list
-  |link=all
-  |limit=20
-  |default=<li><em>None</em></li>
-  |intro=<li>
-  |outro=</li>
-  |sep=</li><li>
-  |searchlabel=
-}}
+{{#invoke:CompanyGames|list|published|limit=20|default=None}}
 <li class="gb-sidebar-more">[{{canonicalurl:{{FULLPAGENAME}}}}#PublishedGames view all →]</li>
 </ul>
 </div>
@@ -115,17 +97,14 @@ This template is called automatically by <code><nowiki>{{CompanyEnd}}</nowiki></
 <div class="gb-accordion">
 <div class="gb-accordion-header">People</div>
 <ul class="gb-accordion-content">
-{{#ask: [[{{FULLPAGENAME}}]]
+{{#show:{{FULLPAGENAME}}
   |?Has people
   |format=list
   |link=all
-  |limit=20
   |default=<li><em>None</em></li>
   |intro=<li>
   |outro=</li>
   |sep=</li><li>
-  |mainlabel=-
-  |searchlabel=
 }}
 </ul>
 </div>
@@ -133,17 +112,14 @@ This template is called automatically by <code><nowiki>{{CompanyEnd}}</nowiki></
 <div class="gb-accordion">
 <div class="gb-accordion-header">Characters</div>
 <ul class="gb-accordion-content">
-{{#ask: [[{{FULLPAGENAME}}]]
+{{#show:{{FULLPAGENAME}}
   |?Has characters
   |format=list
   |link=all
-  |limit=20
   |default=<li><em>None</em></li>
   |intro=<li>
   |outro=</li>
   |sep=</li><li>
-  |mainlabel=-
-  |searchlabel=
 }}
 </ul>
 </div>
@@ -151,17 +127,14 @@ This template is called automatically by <code><nowiki>{{CompanyEnd}}</nowiki></
 <div class="gb-accordion">
 <div class="gb-accordion-header">Locations</div>
 <ul class="gb-accordion-content">
-{{#ask: [[{{FULLPAGENAME}}]]
+{{#show:{{FULLPAGENAME}}
   |?Has locations
   |format=list
   |link=all
-  |limit=20
   |default=<li><em>None</em></li>
   |intro=<li>
   |outro=</li>
   |sep=</li><li>
-  |mainlabel=-
-  |searchlabel=
 }}
 </ul>
 </div>
@@ -169,17 +142,14 @@ This template is called automatically by <code><nowiki>{{CompanyEnd}}</nowiki></
 <div class="gb-accordion">
 <div class="gb-accordion-header">Concepts</div>
 <ul class="gb-accordion-content">
-{{#ask: [[{{FULLPAGENAME}}]]
+{{#show:{{FULLPAGENAME}}
   |?Has concepts
   |format=list
   |link=all
-  |limit=20
   |default=<li><em>None</em></li>
   |intro=<li>
   |outro=</li>
   |sep=</li><li>
-  |mainlabel=-
-  |searchlabel=
 }}
 </ul>
 </div>
@@ -187,17 +157,14 @@ This template is called automatically by <code><nowiki>{{CompanyEnd}}</nowiki></
 <div class="gb-accordion">
 <div class="gb-accordion-header">Objects</div>
 <ul class="gb-accordion-content">
-{{#ask: [[{{FULLPAGENAME}}]]
+{{#show:{{FULLPAGENAME}}
   |?Has objects
   |format=list
   |link=all
-  |limit=20
   |default=<li><em>None</em></li>
   |intro=<li>
   |outro=</li>
   |sep=</li><li>
-  |mainlabel=-
-  |searchlabel=
 }}
 </ul>
 </div>

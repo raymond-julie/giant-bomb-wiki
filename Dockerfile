@@ -58,6 +58,9 @@ RUN cd /var/www/html \
  && git clone -b 'REL1_43' --single-branch --depth 1 https://gerrit.wikimedia.org/r/mediawiki/extensions/ExternalData \
  && wget https://github.com/octfx/mediawiki-extensions-TemplateStylesExtender/archive/refs/tags/v2.0.0.zip \
  && unzip v2.0.0.zip && rm v2.0.0.zip && mv mediawiki-extensions-TemplateStylesExtender-2.0.0 TemplateStylesExtender \
+ # GTag has no release tags -> pin to a known-good master commit (requires MW 1.43+)
+ && git clone https://github.com/SkizNet/mediawiki-GTag.git GTag \
+ && git -C GTag checkout 59c5504da491b3e2d7f7d38c520353332611405d \
  && cd /var/www/html/ \
  && composer update --no-dev
 
@@ -67,6 +70,12 @@ RUN cd /var/www/html \
 # build if they ever come back.
 RUN sed -i "/'ACL'/d" /var/www/html/extensions/AWS/s3/AmazonS3FileBackend.php \
  && ! grep -q "'ACL'" /var/www/html/extensions/AWS/s3/AmazonS3FileBackend.php
+
+# smw 7.0 pins its query-cache stats to CACHE_DB -> every request rewrites one
+# hot objectcache row and convoys the db. route them to the main cache.
+RUN sed -i "s/getObjectCache( CACHE_DB )/getObjectCache( CACHE_ANYTHING )/" \
+      /var/www/html/extensions/SemanticMediaWiki/src/Services/ServicesFactory.php \
+ && ! grep -q "getObjectCache( CACHE_DB )" /var/www/html/extensions/SemanticMediaWiki/src/Services/ServicesFactory.php
 
 # GCS uses uniform bucket-level ACL, so re-uploads need ignorewarnings
 RUN sed -i 's/ignorewarnings: false/ignorewarnings: true/' /var/www/html/resources/src/mediawiki.Upload.js
@@ -90,6 +99,7 @@ COPY --chown=www-data:www-data ./extensions/GbSessionProvider/ /var/www/html/ext
 COPY --chown=www-data:www-data ./extensions/GBModeration /var/www/html/extensions/GBModeration
 COPY --chown=www-data:www-data ./extensions/GBEnvLuaBridge /var/www/html/extensions/GBEnvLuaBridge
 COPY --chown=www-data.www-data ./extensions/GBVirtualReviewPages /var/www/html/extensions/GBVirtualReviewPages
+COPY --chown=www-data:www-data ./extensions/GBCloudflarePurge /var/www/html/extensions/GBCloudflarePurge
 RUN cd /var/www/html/extensions/GbSessionProvider && composer update --no-dev
 
 # Installation script for a new wiki (which copies the LocalSettings.php)

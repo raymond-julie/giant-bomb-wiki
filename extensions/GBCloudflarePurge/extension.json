@@ -1,0 +1,23 @@
+{
+  "name": "GBCloudflarePurge",
+  "version": "1.1.0",
+  "author": ["Chuck Zimmerheld"],
+  "description": "Purges the Cloudflare edge cache when pages change, via core's cdn-url-purges relay. No-op unless zone id + api token are configured.",
+  "manifest_version": 2,
+  "AutoloadClasses": {
+    "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks": "src/Hooks.php",
+    "MediaWiki\\Extension\\GBCloudflarePurge\\CloudflareEventRelayer": "src/CloudflareEventRelayer.php"
+  },
+  "config": {
+    "GBCloudflareZoneId": {
+      "value": ""
+    },
+    "GBCloudflareApiToken": {
+      "value": ""
+    }
+  },
+  "Hooks": {
+    "HTMLFileCache::useFileCache": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onHTMLFileCacheUseFileCache",
+    "SpecialPageBeforeExecute": "MediaWiki\\Extension\\GBCloudflarePurge\\Hooks::onSpecialPageBeforeExecute"
+  }
+}

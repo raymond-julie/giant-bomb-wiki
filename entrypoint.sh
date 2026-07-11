@@ -17,10 +17,11 @@ if [ "$MV_ENV" = "dev" ] && [ -f /docker/dev-startup.sh ]; then
     /bin/bash /docker/dev-startup.sh &
 fi
 
-# Dump runtime env to a shell-sourceable file so cron jobs (which otherwise
-# run with a stripped environment) can pick up CANONICAL_SERVER, DB creds, etc.
-# Keep key=value lines only; strip anything without an = to avoid shell errors.
-env | grep -E '^[A-Za-z_][A-Za-z0-9_]*=' | sed 's/^\(.*\)$/export \1/' > /etc/container.env
+# dump runtime env for cron (which strips it). values must be single-quoted:
+# unquoted spaces (PHP_LDFLAGS) abort dash mid-source -> silent cron ticks
+env | grep -E '^[A-Za-z_][A-Za-z0-9_]*=' \
+    | sed "s/'/'\\\\''/g; s/^\([A-Za-z_][A-Za-z0-9_]*\)=\(.*\)$/export \1='\2'/" \
+    > /etc/container.env
 chmod 644 /etc/container.env
 
 # Start cron if installed (prod image installs it; dev image does not).

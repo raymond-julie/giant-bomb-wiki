@@ -143,7 +143,9 @@ case "${cmd}" in
     # MediaWiki plumbing (templates, SMW, Scribunto, ...).
     SITEMAP_NAMESPACES="${SITEMAP_NAMESPACES:-0}"
 
+    # bounded -- runs unattended (boot + nightly) and would default to unlimited
     run_php --conf "$CONF_PATH" "$MW_ROOT/maintenance/generateSitemap.php" \
+      --memory-limit "${SITEMAP_MEMORY_LIMIT:-1G}" \
       --fspath "$SITEMAP_FSPATH" \
       --urlpath "$SITEMAP_URLPATH" \
       --server "$SITEMAP_SERVER" \

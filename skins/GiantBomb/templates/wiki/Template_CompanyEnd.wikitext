@@ -36,31 +36,13 @@ Then renders the sidebar via <code><nowiki>{{CompanySidebar}}</nowiki></code> an
 <div id="DevelopedGames" class="gb-games-section">
 <div class="gb-games-section-header">Developed Games <span class="gb-games-view-all">[{{fullurl:Special:Ask|q=%5B%5BHas+developers%3A%3A{{urlencode:{{FULLPAGENAME}}}}%5D%5D+%5B%5BCategory%3AGames%5D%5D&po=%3FHas+name%3DName%0A%3FHas+release+date%3DRelease&p=mainlabel%3D-2F&sort=Has+name&order=asc&limit=500&offset=0}} view all →]]</span></div>
 <ul class="gb-games-section-list">
-{{#ask: [[Has developers::{{FULLPAGENAME}}]] [[Category:Games]]
-  |format=list
-  |link=all
-  |limit=100
-  |default=<li><em>No games found</em></li>
-  |intro=<li>
-  |outro=</li>
-  |sep=</li><li>
-  |searchlabel=
-}}
+{{#invoke:CompanyGames|list|developed|limit=100|default=No games found}}
 </ul>
 </div>
 <div id="PublishedGames" class="gb-games-section">
 <div class="gb-games-section-header">Published Games <span class="gb-games-view-all">[{{fullurl:Special:Ask|q=%5B%5BHas+publishers%3A%3A{{urlencode:{{FULLPAGENAME}}}}%5D%5D+%5B%5BCategory%3AGames%5D%5D&po=%3FHas+name%3DName%0A%3FHas+release+date%3DRelease&p=mainlabel%3D-2F&sort=Has+name&order=asc&limit=500&offset=0}} view all →]]</span></div>
 <ul class="gb-games-section-list">
-{{#ask: [[Has publishers::{{FULLPAGENAME}}]] [[Category:Games]]
-  |format=list
-  |link=all
-  |limit=100
-  |default=<li><em>No games found</em></li>
-  |intro=<li>
-  |outro=</li>
-  |sep=</li><li>
-  |searchlabel=
-}}
+{{#invoke:CompanyGames|list|published|limit=100|default=No games found}}
 </ul>
 </div>
 </div>
