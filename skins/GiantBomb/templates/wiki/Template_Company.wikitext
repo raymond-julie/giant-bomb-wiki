@@ -122,13 +122,13 @@ Multi-value properties (comma-separated) use #arraymap.
 }}{{#if:{{{Country|}}}|{{#set:Has country={{{Country}}}}}
 }}{{#if:{{{Phone|}}}|{{#set:Has phone={{{Phone}}}}}
 }}{{#if:{{{Website|}}}|{{#set:Has website={{{Website}}}}}
-}}{{#arraymap:{{{Characters|}}}|,|@@|{{#set:Has characters=@@}}
-}}{{#arraymap:{{{Concepts|}}}|,|@@|{{#set:Has concepts=@@}}
-}}{{#arraymap:{{{DevelopedGames|}}}|,|@@|{{#set:Has developed games=@@}}
-}}{{#arraymap:{{{Locations|}}}|,|@@|{{#set:Has locations=@@}}
-}}{{#arraymap:{{{Objects|}}}|,|@@|{{#set:Has objects=@@}}
-}}{{#arraymap:{{{People|}}}|,|@@|{{#set:Has people=@@}}
-}}{{#arraymap:{{{PublishedGames|}}}|,|@@|{{#set:Has published games=@@}}
+}}{{#invoke:CompanyGames|setCsv|Has characters|{{{Characters|}}}
+}}{{#invoke:CompanyGames|setCsv|Has concepts|{{{Concepts|}}}
+}}{{#invoke:CompanyGames|setCsv|Has developed games|{{{DevelopedGames|}}}
+}}{{#invoke:CompanyGames|setCsv|Has locations|{{{Locations|}}}
+}}{{#invoke:CompanyGames|setCsv|Has objects|{{{Objects|}}}
+}}{{#invoke:CompanyGames|setCsv|Has people|{{{People|}}}
+}}{{#invoke:CompanyGames|setCsv|Has published games|{{{PublishedGames|}}}
 }}<!--
 
 Page Setup

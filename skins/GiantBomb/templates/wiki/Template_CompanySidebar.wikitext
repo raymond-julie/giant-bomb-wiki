@@ -97,75 +97,23 @@ This template is called automatically by <code><nowiki>{{CompanyEnd}}</nowiki></
 <div class="gb-accordion">
 <div class="gb-accordion-header">People</div>
 <ul class="gb-accordion-content">
-{{#show:{{FULLPAGENAME}}
-  |?Has people
-  |format=list
-  |link=all
-  |default=<li><em>None</em></li>
-  |intro=<li>
-  |outro=</li>
-  |sep=</li><li>
-}}
+{{#invoke:CompanyGames|related|Has people|limit=20|default=None}}
 </ul>
 </div>
 
 <div class="gb-accordion">
 <div class="gb-accordion-header">Characters</div>
 <ul class="gb-accordion-content">
-{{#show:{{FULLPAGENAME}}
-  |?Has characters
-  |format=list
-  |link=all
-  |default=<li><em>None</em></li>
-  |intro=<li>
-  |outro=</li>
-  |sep=</li><li>
-}}
+{{#invoke:CompanyGames|related|Has characters|limit=20|default=None}}
 </ul>
 </div>
 
 <div class="gb-accordion">
-<div class="gb-accordion-header">Locations</div>
+<div class="gb-accordion-header">Related</div>
 <ul class="gb-accordion-content">
-{{#show:{{FULLPAGENAME}}
-  |?Has locations
-  |format=list
-  |link=all
-  |default=<li><em>None</em></li>
-  |intro=<li>
-  |outro=</li>
-  |sep=</li><li>
-}}
-</ul>
-</div>
-
-<div class="gb-accordion">
-<div class="gb-accordion-header">Concepts</div>
-<ul class="gb-accordion-content">
-{{#show:{{FULLPAGENAME}}
-  |?Has concepts
-  |format=list
-  |link=all
-  |default=<li><em>None</em></li>
-  |intro=<li>
-  |outro=</li>
-  |sep=</li><li>
-}}
-</ul>
-</div>
-
-<div class="gb-accordion">
-<div class="gb-accordion-header">Objects</div>
-<ul class="gb-accordion-content">
-{{#show:{{FULLPAGENAME}}
-  |?Has objects
-  |format=list
-  |link=all
-  |default=<li><em>None</em></li>
-  |intro=<li>
-  |outro=</li>
-  |sep=</li><li>
-}}
+<li class="gb-sidebar-more">[{{fullurl:Special:Ask|q=%5B%5B-Has+concepts%3A%3A{{urlencode:{{FULLPAGENAME}}}}%5D%5D&p=format%3Dbroadtable&limit=500}} Concepts →]</li>
+<li class="gb-sidebar-more">[{{fullurl:Special:Ask|q=%5B%5B-Has+locations%3A%3A{{urlencode:{{FULLPAGENAME}}}}%5D%5D&p=format%3Dbroadtable&limit=500}} Locations →]</li>
+<li class="gb-sidebar-more">[{{fullurl:Special:Ask|q=%5B%5B-Has+objects%3A%3A{{urlencode:{{FULLPAGENAME}}}}%5D%5D&p=format%3Dbroadtable&limit=500}} Objects →]</li>
 </ul>
 </div>
 

@@ -1,5 +1,5 @@
--- developed/published games for company pages. module state persists across
--- #invoke calls in a parse, so CompanyEnd + CompanySidebar share one query
+-- company-page list helpers. module state persists across #invoke in a
+-- parse, so CompanyEnd + CompanySidebar share one games query
 local p = {}
 
 local PROPS = {
@@ -17,6 +17,25 @@ local function plain(v)
         return inner:match('^(.-)|') or inner
     end
     return tostring(v)
+end
+
+local function renderRows(rows, limit)
+    local items = {}
+    for i = 1, math.min(limit, #rows) do
+        local row = rows[i]
+        local page = plain(row.page)
+        local display = row.display
+        if type(display) == 'table' then
+            display = display[1]
+        end
+        if display ~= nil and display ~= '' then
+            display = plain(display)
+        else
+            display = string.match(page, '([^/]+)$') or page
+        end
+        items[#items + 1] = '<li>[[' .. page .. '|' .. display .. ']]</li>'
+    end
+    return table.concat(items)
 end
 
 local function fetch(relation)
@@ -47,24 +66,60 @@ function p.list(frame)
     if not rows or #rows == 0 then
         return fallback
     end
+    return renderRows(rows, tonumber(args.limit) or MAX)
+end
 
-    local limit = math.min(tonumber(args.limit) or MAX, #rows)
-    local items = {}
-    for i = 1, limit do
-        local row = rows[i]
-        local page = plain(row.page)
-        local display = row.display
-        if type(display) == 'table' then
-            display = display[1]
-        end
-        if display ~= nil and display ~= '' then
-            display = plain(display)
-        else
-            display = string.match(page, '([^/]+)$') or page
-        end
-        items[#items + 1] = '<li>[[' .. page .. '|' .. display .. ']]</li>'
+-- {{#invoke:CompanyGames|related|Has people|limit=20|default=None}}
+-- inverse condition so limit caps values -- #show prints ALL of them,
+-- which is thousands of links on the big companies
+function p.related(frame)
+    local args = frame.args
+    local fallback = '<li><em>' .. (args.default or 'None') .. '</em></li>'
+    local prop = mw.text.trim(args[1] or '')
+    if prop == '' then
+        return fallback
     end
-    return table.concat(items)
+    local rows = mw.smw.ask{
+        '[[-' .. prop .. '::' .. mw.title.getCurrentTitle().prefixedText .. ']]',
+        '?Display title of=display',
+        'mainlabel=page',
+        'link=none',
+        'limit=' .. (tonumber(args.limit) or 20),
+        -- oldest entries first (guid order) -- the notable ones
+        'sort=Creation date',
+        'order=asc',
+    }
+    if not rows or #rows == 0 then
+        return fallback
+    end
+    return renderRows(rows, tonumber(args.limit) or 20)
+end
+
+-- {{#invoke:CompanyGames|setCsv|Has characters|{{{Characters|}}}}}
+-- smw burns ~1.6ms of cpu per stored page value -- sega's 15k values was a
+-- 20s parse. cap per property; accordions show 20, ask links show the cap
+local SET_CAP = 200
+
+function p.setCsv(frame)
+    local prop = mw.text.trim(frame.args[1] or '')
+    local csv = frame.args[2] or ''
+    if prop == '' or mw.text.trim(csv) == '' then
+        return ''
+    end
+    local values = {}
+    for v in csv:gmatch('[^,]+') do
+        v = mw.text.trim(v)
+        if v ~= '' then
+            values[#values + 1] = v
+            if #values >= SET_CAP then
+                break
+            end
+        end
+    end
+    if #values > 0 then
+        mw.smw.set({ [prop] = values })
+    end
+    return ''
 end
 
 return p
