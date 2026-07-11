@@ -2,7 +2,7 @@
 |title=Companies}}<!--
 -->{{LandingPageQuery
   |name=Company
-  |filterTitle=Filter Companies
+  |filterTitle=Search Companies
   |chosen_letter={{#urlget:chosen_letter|All}}
   |search_filter={{#urlget:search_filter}}
   |sort_by={{#urlget:sort_by}}

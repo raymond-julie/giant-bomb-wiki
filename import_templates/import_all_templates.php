@@ -376,8 +376,20 @@ class ImportWikiTemplates extends Maintenance
                 EDIT_FORCE_BOT | EDIT_SUPPRESS_RC,
             );
 
-            $this->output("Imported: $titleStr\n");
-            $imported++;
+            // scribunto validation / moderation can reject the save silently
+            if ($updater->wasSuccessful()) {
+                $this->output("Imported: $titleStr\n");
+                $imported++;
+            } else {
+                $this->output(
+                    "FAILED: $titleStr -- " .
+                        $updater
+                            ->getStatus()
+                            ->getWikiText(false, false, "en") .
+                        "\n",
+                );
+                $skipped++;
+            }
         }
 
         $this->output("\nDone! Imported: $imported, Skipped: $skipped\n");
