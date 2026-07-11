@@ -454,6 +454,12 @@ $wgGiantBombResolveFields = [
     "pageid",
     "namespace",
     "image",
+    "deck",
+    "original_release_date",
+    "platforms",
+    "developers",
+    "publishers",
+    "genres",
 ];
 
 $gbResolveToken = getenv("MW_GIANTBOMB_RESOLVE_INTERNAL_TOKEN");

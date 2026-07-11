@@ -254,6 +254,28 @@ class ResolveHandler extends SimpleHandler
         ) {
             $query .= "|?Has image=Primary image";
         }
+        // entity-detail printouts, per requested field so the common
+        // name/image resolve stays as light as today
+        if (in_array("deck", $fields, true)) {
+            $query .= "|?Has deck=Deck";
+        }
+        if (in_array("original_release_date", $fields, true)) {
+            $query .=
+                "|?Has release date=ReleaseDate" .
+                "|?Has release date type=ReleaseDateType";
+        }
+        if (in_array("platforms", $fields, true)) {
+            $query .= "|?Has platforms=Platforms";
+        }
+        if (in_array("developers", $fields, true)) {
+            $query .= "|?Has developers=Developers";
+        }
+        if (in_array("publishers", $fields, true)) {
+            $query .= "|?Has publishers=Publishers";
+        }
+        if (in_array("genres", $fields, true)) {
+            $query .= "|?Has genres=Genres";
+        }
         $timer = microtime(true);
         $result = $this->runAskQuery($query);
         $elapsed = microtime(true) - $timer;
@@ -320,6 +342,55 @@ class ResolveHandler extends SimpleHandler
                     if ($image !== null) {
                         $data["image"] = $image;
                     }
+                    break;
+                case "deck":
+                    $deck = $this->extractScalarPrintout(
+                        $first["printouts"] ?? [],
+                        "Deck",
+                    );
+                    if ($deck !== null) {
+                        $data["deck"] = $deck;
+                    }
+                    break;
+                case "original_release_date":
+                    $releaseDate = $this->extractScalarPrintout(
+                        $first["printouts"] ?? [],
+                        "ReleaseDate",
+                    );
+                    if ($releaseDate !== null) {
+                        $data["originalReleaseDate"] = $releaseDate;
+                    }
+                    $releaseDateType = $this->extractScalarPrintout(
+                        $first["printouts"] ?? [],
+                        "ReleaseDateType",
+                    );
+                    if ($releaseDateType !== null) {
+                        $data["releaseDateType"] = $releaseDateType;
+                    }
+                    break;
+                case "platforms":
+                    $data["platforms"] = $this->extractListPrintout(
+                        $first["printouts"] ?? [],
+                        "Platforms",
+                    );
+                    break;
+                case "developers":
+                    $data["developers"] = $this->extractListPrintout(
+                        $first["printouts"] ?? [],
+                        "Developers",
+                    );
+                    break;
+                case "publishers":
+                    $data["publishers"] = $this->extractListPrintout(
+                        $first["printouts"] ?? [],
+                        "Publishers",
+                    );
+                    break;
+                case "genres":
+                    $data["genres"] = $this->extractListPrintout(
+                        $first["printouts"] ?? [],
+                        "Genres",
+                    );
                     break;
             }
         }
@@ -468,6 +539,100 @@ class ResolveHandler extends SimpleHandler
             throw new HttpException("resolve-missing-guids", 400);
         }
         return array_values(array_unique($out));
+    }
+
+    /**
+     * First value of a printout as a plain string (null when absent).
+     *
+     * @param array<string,mixed> $printouts
+     */
+    private function extractScalarPrintout(
+        array $printouts,
+        string $key,
+    ): ?string {
+        $values = $this->extractListPrintout($printouts, $key);
+        return $values[0] ?? null;
+    }
+
+    /**
+     * All values of a printout as plain strings.
+     *
+     * @param array<string,mixed> $printouts
+     * @return string[]
+     */
+    private function extractListPrintout(array $printouts, string $key): array
+    {
+        if (empty($printouts[$key]) || !is_array($printouts[$key])) {
+            return [];
+        }
+        $out = [];
+        foreach ($printouts[$key] as $value) {
+            $text = $this->printoutValueToString($value);
+            if ($text !== null && $text !== "") {
+                $out[] = $text;
+            }
+        }
+        return array_values(array_unique($out));
+    }
+
+    /**
+     * Normalize an SMW printout value (plain string, page reference, or
+     * date) to a plain string.
+     *
+     * @param mixed $value
+     */
+    private function printoutValueToString($value): ?string
+    {
+        if (is_string($value)) {
+            return trim($value);
+        }
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+        if (is_array($value)) {
+            // page values: use the subpage leaf ("Platforms/Atari 2600" -> "Atari 2600")
+            if (isset($value["fulltext"]) && is_string($value["fulltext"])) {
+                $text = trim($value["fulltext"]);
+                $slashPos = strrpos($text, "/");
+                return $slashPos === false
+                    ? $text
+                    : trim(substr($text, $slashPos + 1));
+            }
+            if (isset($value["raw"]) && is_string($value["raw"])) {
+                return $this->smwRawDateToIso($value["raw"]);
+            }
+            if (isset($value["timestamp"]) && is_numeric($value["timestamp"])) {
+                return gmdate("Y-m-d", (int) $value["timestamp"]);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * SMW raw date ("1/1972/11/29", calendar model then Y[/M[/D]]) to an
+     * iso-ish string with matching precision ("1972-11-29", "1972-11",
+     * "1972") -- a year-only date must not fabricate a month/day.
+     */
+    private function smwRawDateToIso(string $raw): ?string
+    {
+        $trimmed = trim($raw);
+        if ($trimmed === "") {
+            return null;
+        }
+        $parts = explode("/", $trimmed);
+        if (count($parts) < 2 || !is_numeric($parts[1])) {
+            return $trimmed;
+        }
+        array_shift($parts); // calendar model
+        $year = (int) array_shift($parts);
+        $iso = sprintf("%04d", $year);
+        if ($parts && is_numeric($parts[0])) {
+            $iso .= sprintf("-%02d", (int) array_shift($parts));
+            if ($parts && is_numeric($parts[0])) {
+                $iso .= sprintf("-%02d", (int) array_shift($parts));
+            }
+        }
+        return $iso;
     }
 
     /**

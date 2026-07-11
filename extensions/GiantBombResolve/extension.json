@@ -59,7 +59,13 @@
         "fulltext",
         "pageid",
         "namespace",
-        "image"
+        "image",
+        "deck",
+        "original_release_date",
+        "platforms",
+        "developers",
+        "publishers",
+        "genres"
       ],
       "description": "Default list of MediaWiki fields returned for each resolved GUID."
     }
