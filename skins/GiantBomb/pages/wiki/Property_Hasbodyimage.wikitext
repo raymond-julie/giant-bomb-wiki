@@ -1,0 +1,1 @@
+This is a property of type [[Has type::URL]]. Set by [[Template:GBFigure]] for each body image in use on a page; queried by /Images subpages.

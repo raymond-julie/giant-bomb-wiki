@@ -813,6 +813,97 @@ td.diff-marker {
   overflow: hidden;
 }
 
+/* long tocs scroll instead of dominating the page */
+#toc {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* collapsed toc sections (toc-collapse.js) */
+#toc li.gb-toc-collapsed > ul {
+  display: none;
+}
+
+.gb-toc-toggle {
+  background: none;
+  border: 1px solid #333;
+  border-radius: 3px;
+  color: #aaa;
+  cursor: pointer;
+  font-size: 0.75em;
+  margin-left: 8px;
+  padding: 0 6px;
+  vertical-align: middle;
+}
+
+.gb-toc-toggle:hover {
+  color: #fff;
+  border-color: #b05f1c;
+}
+
+/* contain floats: without this, stacked floated figures escape the article
+   body and push the sidebar/infobox below the content */
+.mw-parser-output {
+  display: flow-root;
+}
+
+/* GB body figures ({{GBFigure}} - floated/captioned legacy CDN images) */
+.gb-figure {
+  max-width: 100%;
+  margin: 0.5em 0 1em;
+}
+
+.gb-figure img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* the bare url renders as <p><img></p>; collapse that wrapper */
+.gb-figure p {
+  margin: 0;
+}
+
+.gb-figure-left {
+  float: left;
+  clear: left;
+  margin: 0.5em 1.5rem 1rem 0;
+}
+
+.gb-figure-right {
+  float: right;
+  clear: right;
+  margin: 0.5em 0 1rem 1.5rem;
+}
+
+.gb-figure-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.gb-figure-caption {
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.3;
+  color: #aaa;
+}
+
+@media (max-width: 768px) {
+  .gb-figure-left,
+  .gb-figure-right {
+    float: none;
+    clear: both;
+    margin: 1em auto;
+  }
+}
+
+/* natural-width tables from the re-migration (no data-max-width in legacy html).
+   !important: entity page css forces width:100% on all content tables */
+body.skin-giantbomb table.gb-table-natural {
+  width: auto !important;
+}
+
 /* GB Gallery Lightbox */
 .gb-lightbox {
   position: fixed;

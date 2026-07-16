@@ -67,7 +67,8 @@
         "resources/js/game-sidebar-tabs.js",
         "resources/js/root-page-filters.js",
         "resources/js/wikieditor-link-dialog.js",
-        "resources/js/ve-link-dialog.js"
+        "resources/js/ve-link-dialog.js",
+        "resources/js/toc-collapse.js"
       ],
       "position": "top"
     }

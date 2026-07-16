@@ -46,6 +46,9 @@ class ImportWikiTemplates extends Maintenance
 
         // Shared templates used by multiple page types
         $sharedTemplates = [
+            "Template:GBFigure" => "$templateDir/Template_GBFigure.wikitext",
+            "Property:Has_body_image" =>
+                "$pagesDir/Property_Hasbodyimage.wikitext",
             "Template:StripPrefix" => "$templateDir/Template_StripPrefix.wikitext",
             "Template:SidebarListItem" => "$templateDir/Template_SidebarListItem.wikitext",
             "Template:SidebarRelatedItem" => "$templateDir/Template_SidebarRelatedItem.wikitext",

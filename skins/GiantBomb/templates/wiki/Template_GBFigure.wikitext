@@ -1,0 +1,58 @@
+<includeonly><div class="gb-figure gb-figure-{{#switch:{{{align|}}}|left=left|right=right|center=center|#default=none}}" style="width:{{#if:{{{width|}}}|{{{width}}}px|auto}}" data-full="{{{full|}}}">
+{{{src|}}}
+{{#if:{{{caption|}}}|<div class="gb-figure-caption">{{{caption}}}</div>}}
+</div>{{#if:{{{src|}}}|{{#set:Has body image={{{src}}}}}}}</includeonly><noinclude>
+Floated, captioned body image served from the legacy Giant Bomb CDN. Emitted by the figure re-migration (docs/figure-formatting-remigration.md); the bare src URL renders as an external image via $wgAllowExternalImagesFrom. Each use also annotates [[Property:Has_body_image]] so /Images subpages can query in-use images. full= is stored as data-full for a future lightbox/click-through.
+
+Usage:
+<pre>
+{{GBFigure
+|src=https://www.giantbomb.com/a/uploads/ignore_jpg_scale_medium/0/1992/1462560-map_antonica_hi.gif
+|full=https://www.giantbomb.com/a/uploads/original/0/1992/1462560-map_antonica_hi.gif
+|align=left
+|width=350
+|caption=Map of Antonica
+}}
+</pre>
+
+<templatedata>
+{
+	"description": "A body image with optional float alignment, pixel width, and caption. Used for legacy Giant Bomb CDN images.",
+	"format": "inline",
+	"params": {
+		"src": {
+			"label": "Image URL",
+			"description": "Scaled rendition URL (…/a/uploads/scale_small|scale_medium|scale_large/…)",
+			"type": "url",
+			"required": true
+		},
+		"caption": {
+			"label": "Caption",
+			"description": "Text shown under the image",
+			"type": "string",
+			"suggested": true
+		},
+		"align": {
+			"label": "Alignment",
+			"description": "Float the image left or right, center it, or leave it in the text flow",
+			"type": "string",
+			"suggestedvalues": ["left", "right", "center", "none"],
+			"default": "none",
+			"suggested": true
+		},
+		"width": {
+			"label": "Width (px)",
+			"description": "Rendered width in pixels; omit to size naturally",
+			"type": "number",
+			"suggested": true
+		},
+		"full": {
+			"label": "Full-size URL",
+			"description": "Original-resolution URL, stored for future click-through",
+			"type": "url"
+		}
+	},
+	"paramOrder": ["src", "caption", "align", "width", "full"]
+}
+</templatedata>
+</noinclude>
