@@ -21,6 +21,6 @@ class EnvLuaLibrary extends Scribunto_LuaLibraryBase {
 
     public function getApiKey() {
         $key = getenv("GB_API_KEY");
-        return [ $key === false ? "test" : $key ];
+        return [ $key !== false ? $key : 'test' ];
     }
 }
