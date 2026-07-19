@@ -1,4 +1,4 @@
-<?php
+const DEFAULT_MERGE_ID = 0;<?php
 
 /*
 	Extension:Moderation - MediaWiki extension.
@@ -50,7 +50,7 @@ class EditFormOptions
      * If true, pages passed to watchIfNeeded() will be Watched, if false, Unwatched.
      * If null, then neither Watching nor Unwatching is necessary.
      */
-    protected $watchthis = null;
+    protected $isWatchThis = null;
 
     /** @var IConsequenceManager */
     protected $consequenceManager;
@@ -91,7 +91,7 @@ class EditFormOptions
         &$error,
         $summary,
     ) {
-        if ($section !== "") {
+        if (!empty($section)) {
             $this->section = $section;
             $this->sectionText = $text;
         }
@@ -104,7 +104,7 @@ class EditFormOptions
         $reflection->setAccessible(true);
         $watchthis = $reflection->getValue($editor);
 
-        $this->watchthis = (bool) $watchthis;
+        $this->isWatchThis = (bool) $watchthis;
     }
 
     /**
@@ -139,10 +139,10 @@ class EditFormOptions
     public function getMergeID()
     {
         if ($this->newMergeID) {
-            return $this->newMergeID;
+            return $this->getMergeIdValue();
         }
 
-        return RequestContext::getMain()->getRequest()->getInt("wpMergeID", 0);
+        return RequestContext::getMain()->getRequest()->getInt("wpMergeID", self::DEFAULT_MERGE_ID);
     }
 
     /**
@@ -168,7 +168,7 @@ class EditFormOptions
      */
     public function watchIfNeeded(User $user, array $titles)
     {
-        if ($this->watchthis === null) {
+        if (null === $this->watchthis) {
             // Neither Watch nor Unwatch were requested.
             return;
         }
